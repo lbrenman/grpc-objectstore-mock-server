@@ -2,6 +2,8 @@
 
 A minimal gRPC service with a Kubernetes-style **watch** pattern: open a server-streaming `WatchObjects` call in one terminal, create/delete objects from another, and see events arrive on the stream in real time.
 
+An Amplify Fusion Proxy project can be found [here](https://github.com/lbrenman/Amplify-Fusion-gRPC-Object-Store-Demo).
+
 ## What's inside
 
 ```
