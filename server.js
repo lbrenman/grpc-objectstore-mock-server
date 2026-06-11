@@ -58,7 +58,7 @@ const serviceImpl = {
       id: crypto.randomUUID(),
       kind,
       name,
-      labels: labels || {},
+      labels: labels || [], // repeated Label { key, value }
       created_at: now(),
     };
     objects.set(object.id, object);
