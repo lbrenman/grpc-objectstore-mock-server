@@ -49,60 +49,59 @@ Run from your project directory (or adjust the `-protoset`/`-proto` path):
 
 ```bash
 # Using the compiled descriptor
-grpcurl -protoset proto/objectstore.pb -d '{}' \
+
+export API_KEY="your-key-here"
+
+# List
+grpcurl -protoset proto/objectstore.pb -H "x-api-key: $API_KEY" -d '{}' \
   axway-appc-se-design.sandbox.fusion.services.axway.com:4443 \
   objectstore.ObjectStore/ListObjects
 
-grpcurl -protoset proto/objectstore.pb \
+# Create
+grpcurl -protoset proto/objectstore.pb -H "x-api-key: $API_KEY" \
   -d '{"kind":"patient","name":"Ada Lovelace","labels":[{"key":"ward","value":"3B"}]}' \
   axway-appc-se-design.sandbox.fusion.services.axway.com:4443 \
   objectstore.ObjectStore/CreateObject
 
-grpcurl -protoset proto/objectstore.pb -d '{"id":"<uuid>"}' \
+# Get
+grpcurl -protoset proto/objectstore.pb -H "x-api-key: $API_KEY" -d '{"id":"<uuid>"}' \
   axway-appc-se-design.sandbox.fusion.services.axway.com:4443 \
   objectstore.ObjectStore/GetObject
 
-grpcurl -protoset proto/objectstore.pb -d '{"id":"<uuid>"}' \
+# Delete
+grpcurl -protoset proto/objectstore.pb -H "x-api-key: $API_KEY" -d '{"id":"<uuid>"}' \
   axway-appc-se-design.sandbox.fusion.services.axway.com:4443 \
   objectstore.ObjectStore/DeleteObject
 
-# Watch through the proxy — the streaming pass-through test
-grpcurl -protoset proto/objectstore.pb -d '{"send_snapshot":true}' \
+# Watch (streaming pass-through test)
+grpcurl -protoset proto/objectstore.pb -H "x-api-key: $API_KEY" -d '{"send_snapshot":true}' \
   axway-appc-se-design.sandbox.fusion.services.axway.com:4443 \
   objectstore.ObjectStore/WatchObjects
 
-# Equivalent using the .proto source instead of the .pb
-grpcurl -proto objectstore.proto -import-path proto -d '{}' \
+# .proto variant
+grpcurl -proto objectstore.proto -import-path proto -H "x-api-key: $API_KEY" -d '{}' \
   axway-appc-se-design.sandbox.fusion.services.axway.com:4443 \
   objectstore.ObjectStore/ListObjects
 ```
 
 ## 4. Fusion as REST (curl)
 
-I don't know the paths/methods you configured in your Fusion flows, so these use a placeholder base URL and the obvious resource mapping — adjust to match your actual proxy design:
-
 ```bash
 FUSION_REST="<your-fusion-base-path>"
 
 # Create
 curl -s -X POST "$FUSION_REST/objects" \
+  -H "x-api-key: $API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"kind":"patient","name":"Ada Lovelace","labels":[{"key":"ward","value":"3B"}]}' | jq
 
 # List (all / filtered)
-curl -s "$FUSION_REST/objects" | jq
-curl -s "$FUSION_REST/objects?kind=patient" | jq
+curl -s "$FUSION_REST/objects" -H "x-api-key: $API_KEY" | jq
+curl -s "$FUSION_REST/objects?kind=patient" -H "x-api-key: $API_KEY" | jq
 
-# Get / Delete
-curl -s "$FUSION_REST/objects/<uuid>" | jq
-curl -s -X DELETE "$FUSION_REST/objects/<uuid>" | jq
+# Get
+curl -s "$FUSION_REST/objects/<uuid>" -H "x-api-key: $API_KEY" | jq
 
-# If your flow requires an API key or auth header:
-curl -s "$FUSION_REST/objects" -H "X-Api-Key: $API_KEY" | jq
-```
-
-Note there's no REST equivalent for `WatchObjects` unless you built one — a streaming gRPC method doesn't map to a plain request/response. If you exposed it via Fusion's SSE support (like your earlier streaming chat app), it'd be:
-
-```bash
-curl -N "$FUSION_REST/objects/watch"   # -N disables buffering for SSE
+# Delete
+curl -s -X DELETE "$FUSION_REST/objects/<uuid>" -H "x-api-key: $API_KEY" | jq
 ```
