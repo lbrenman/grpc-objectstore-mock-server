@@ -1,0 +1,23 @@
+# flyctl launch added from .gitignore
+# Dependencies
+**/node_modules
+
+# Environment / secrets
+**/.env
+**/.env.*
+!**/.env.example
+
+# Logs
+**/logs
+**/*.log
+**/npm-debug.log*
+
+# OS / editor noise
+**/.DS_Store
+**/Thumbs.db
+**/.vscode
+**/.idea
+
+# Fly.io local artifacts
+**/.fly
+fly.toml
