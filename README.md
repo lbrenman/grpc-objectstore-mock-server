@@ -58,7 +58,7 @@ Terminal 1 immediately prints:
     "id": "…uuid…",
     "kind": "patient",
     "name": "Ada Lovelace",
-    "labels": { "ward": "3B" },
+    "labels": [{ "key": "ward", "value": "3B" }],
     "created_at": "…"
   },
   "timestamp": "…"
@@ -87,13 +87,21 @@ fly launch --no-deploy     # accept the existing fly.toml when prompted; pick a 
 fly deploy
 ```
 
-`fly launch` may rewrite the app name in `fly.toml` — keep the `[[services]]`
-block exactly as-is. That block is what makes gRPC work:
+`fly launch` may rewrite the app name in `fly.toml` — keep the `[http_service]`
+block exactly as-is. That block is what makes gRPC work on the **free shared
+IPv4** (no dedicated IP needed):
 
 - Fly's edge terminates **TLS** on port 443 and negotiates **HTTP/2** with your
-  client via `alpn = ["h2"]`
-- It forwards cleartext HTTP/2 (h2c) to the app on port 50051
+  client natively (the HTTP proxy supports h2 on shared IPs)
+- `h2_backend = true` tells the proxy to speak cleartext HTTP/2 (h2c) — not
+  HTTP/1.1 — to the app on port 50051; gRPC is just HTTP/2 with trailers, so it
+  rides through cleanly
 - Your server code stays plain `createInsecure()` — no certs in the app
+
+If the app has no public IP (DNS doesn't resolve), allocate the free shared
+IPv4: `fly ips allocate-v4 --shared -a <app-name>`. Note: the alternative
+raw-TCP config with `alpn = ["h2"]` passthrough requires a **dedicated** IPv4
+(~$2/mo) — shared IPs don't honor custom ALPN options.
 
 ### The two-terminal demo (against Fly)
 
