@@ -1,8 +1,6 @@
-# gRPC ObjectStore — watch demo on Fly.io
+# gRPC ObjectStore on Fly.io
 
-> A minimal gRPC service with a Kubernetes-style **watch** pattern: open a
-> server-streaming `WatchObjects` call in one terminal, create/delete objects
-> from another, and see events arrive on the stream in real time.
+A minimal gRPC service with a Kubernetes-style **watch** pattern: open a server-streaming `WatchObjects` call in one terminal, create/delete objects from another, and see events arrive on the stream in real time.
 
 ## What's inside
 
@@ -167,10 +165,3 @@ client.CreateObject(
 - **Anyone can call it.** There's no auth — don't put real data in it. Easy
   hardening if needed: check a metadata key (e.g. `x-api-key`) in a server
   interceptor.
-
-## Cost
-
-A single `shared-cpu-1x` / 256 MB machine sits comfortably inside Fly.io's
-smallest paid tier; an idle gRPC demo costs roughly a couple of dollars a
-month at current pricing. Check https://fly.io/docs/about/pricing/ for
-current numbers.
