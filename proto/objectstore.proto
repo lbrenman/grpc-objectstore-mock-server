@@ -1,0 +1,73 @@
+syntax = "proto3";
+
+package objectstore;
+
+// A simple object store with a Kubernetes-style watch pattern.
+// Open a WatchObjects stream in one client, then CreateObject/DeleteObject
+// from another client and observe events arrive on the stream in real time.
+service ObjectStore {
+  // Create an object. Broadcasts a CREATED event to all active watchers.
+  rpc CreateObject(CreateObjectRequest) returns (Object);
+
+  // Get a single object by id.
+  rpc GetObject(GetObjectRequest) returns (Object);
+
+  // List all objects, optionally filtered by kind.
+  rpc ListObjects(ListObjectsRequest) returns (ListObjectsResponse);
+
+  // Delete an object by id. Broadcasts a DELETED event to all active watchers.
+  rpc DeleteObject(DeleteObjectRequest) returns (Object);
+
+  // Server-streaming watch. The stream stays open and emits an ObjectEvent
+  // every time an object is created or deleted. Optionally filter by kind.
+  // On connect, the server first replays existing objects as SNAPSHOT events
+  // (set send_snapshot = false to skip).
+  rpc WatchObjects(WatchRequest) returns (stream ObjectEvent);
+}
+
+message Object {
+  string id = 1;          // server-assigned
+  string kind = 2;        // e.g. "patient", "order", "widget"
+  string name = 3;
+  map<string, string> labels = 4;
+  string created_at = 5;  // RFC 3339
+}
+
+message CreateObjectRequest {
+  string kind = 1;
+  string name = 2;
+  map<string, string> labels = 3;
+}
+
+message GetObjectRequest {
+  string id = 1;
+}
+
+message ListObjectsRequest {
+  string kind = 1; // empty = all kinds
+}
+
+message ListObjectsResponse {
+  repeated Object objects = 1;
+}
+
+message DeleteObjectRequest {
+  string id = 1;
+}
+
+message WatchRequest {
+  string kind = 1;            // empty = watch all kinds
+  bool send_snapshot = 2;     // replay existing objects as SNAPSHOT events on connect
+}
+
+message ObjectEvent {
+  enum EventType {
+    EVENT_TYPE_UNSPECIFIED = 0;
+    SNAPSHOT = 1; // existing object replayed at watch start
+    CREATED = 2;
+    DELETED = 3;
+  }
+  EventType type = 1;
+  Object object = 2;
+  string timestamp = 3; // RFC 3339
+}

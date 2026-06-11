@@ -1,0 +1,18 @@
+{
+  "name": "grpc-objectstore",
+  "version": "1.0.0",
+  "description": "Simple gRPC object store with a Kubernetes-style watch stream, deployable to Fly.io",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@grpc/grpc-js": "^1.12.0",
+    "@grpc/proto-loader": "^0.7.13",
+    "@grpc/reflection": "^1.0.4"
+  },
+  "license": "MIT"
+}
